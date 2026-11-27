@@ -4,11 +4,11 @@ export function agentUrl() {
   return document.querySelector('meta[name="agent-url"]')?.content?.trim() || '';
 }
 
-export async function askAgent(url, history) {
+export async function askAgent(url, history, mode) {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ messages: history.slice(-12) }),
+    body: JSON.stringify(mode ? { messages: history.slice(-12), mode } : { messages: history.slice(-12) }),
   });
   if (!res.ok) throw new Error(`agent ${res.status}`);
   const data = await res.json();

@@ -1,5 +1,5 @@
 import { buildWaUrl, matchTour } from './order.js';
-import { agentUrl, askAgent } from './agent.js';
+import { agentUrl, askAgent } from './agent.js?v=4';
 
 export const CATALOG = [
   { name: 'Кольсайские озёра и Каинды', days: [1, 2], season: ['summer'], tags: ['lakes', 'mountains'] },
@@ -274,6 +274,30 @@ function initChat() {
     chips.append(link);
   }
 
+  // Перед отправкой в WhatsApp ИИ читает весь чат и собирает заявку для менеджера,
+  // чтобы гостю не задавали те же вопросы второй раз. Гость видит заявку до отправки.
+  function summaryChip(label, kind, fallback) {
+    const b = el('button', kind ? 'cx__chip cx__chip--wa cx__chip--plan' : 'cx__chip cx__chip--wa', label);
+    b.type = 'button';
+    b.addEventListener('click', () => {
+      chips.replaceChildren();
+      const wrap = t => (kind ? buildItineraryText(t) : t);
+      say('Собираю заявку для менеджера по нашему разговору…', () => {
+        askAgent(aiUrl, history, 'summary').then(r => {
+          say('Вот что я передам менеджеру, чтобы вас не спрашивали второй раз:\n\n' + r.text, () => {
+            chips.replaceChildren();
+            waChip('Отправить в WhatsApp', wrap(r.text));
+            chip('Продолжить чат', () => { chips.replaceChildren(); input.focus(); });
+          });
+        }).catch(() => {
+          chips.replaceChildren();
+          waChip('Отправить в WhatsApp', wrap(fallback || 'Здравствуйте! Хочу подобрать тур.'));
+        });
+      });
+    });
+    chips.append(b);
+  }
+
   function runQuiz() {
     const picked = {};
     const ask = i => {
@@ -316,8 +340,8 @@ function initChat() {
           (log.lastElementChild.querySelector('.cx__text') || log.lastElementChild).append(img);
         });
         chips.replaceChildren();
-        if (reply.wa) waChip('Написать в WhatsApp', reply.wa);
-        waChip('Запросить маршрут по дням', buildItineraryText(reply.wa || ''), 'cx__chip--plan');
+        summaryChip('Отправить заявку менеджеру', '', reply.wa);
+        summaryChip('Запросить маршрут по дням', 'plan', reply.wa);
         chip('Подбор за 4 вопроса', runQuiz);
       });
     }).catch(() => {
