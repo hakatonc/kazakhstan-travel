@@ -255,6 +255,15 @@ function initChat() {
     askAgent(aiUrl, history).then(reply => {
       history.push({ role: 'assistant', content: reply.text });
       say(reply.text, () => {
+        reply.photos.filter(n => /^[a-z0-9-]+$/.test(n)).slice(0, 3).forEach(n => {
+          const img = document.createElement('img');
+          img.className = 'cx__photo';
+          img.src = `assets/img/${n}.webp`;
+          img.alt = '';
+          img.loading = 'lazy';
+          img.onload = () => { log.scrollTop = log.scrollHeight; };
+          (log.lastElementChild.querySelector('.cx__text') || log.lastElementChild).append(img);
+        });
         if (!reply.wa) return;
         const link = el('a', 'cx__chip cx__chip--wa', 'Написать в WhatsApp');
         link.href = buildWaUrl(reply.wa);

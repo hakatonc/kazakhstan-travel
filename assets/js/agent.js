@@ -13,5 +13,5 @@ export async function askAgent(url, history) {
   if (!res.ok) throw new Error(`agent ${res.status}`);
   const data = await res.json();
   if (typeof data.text !== 'string' || !data.text) throw new Error('empty');
-  return { text: data.text, wa: typeof data.wa === 'string' ? data.wa : null };
+  return { text: data.text, wa: typeof data.wa === 'string' ? data.wa : null, photos: Array.isArray(data.photos) ? data.photos : [] };
 }
