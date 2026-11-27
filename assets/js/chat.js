@@ -42,6 +42,22 @@ export const STEPS = [
   },
 ];
 
+export const QUIZ = [
+  { key: 'days', question: 'Сколько дней на поездку?', options: ['1 день', '2 дня', '3 дня и больше'] },
+  { key: 'who', question: 'С кем едете?', options: ['Один или вдвоём', 'С детьми', 'С пожилыми', 'Компанией'] },
+  { key: 'like', question: 'Что любите?', options: ['Озёра', 'Каньоны', 'Горы', 'Пустыня'] },
+  { key: 'pace', question: 'Какой темп?', options: ['Спокойный', 'Активный'] },
+];
+
+export function buildQuizRequest(a) {
+  return 'Мини-подбор: ' + a.days + '; еду: ' + a.who.toLowerCase() + '; люблю: ' +
+    a.like.toLowerCase() + '; темп: ' + a.pace.toLowerCase() + '. Какой тур подойдёт?';
+}
+
+export function buildItineraryText(wa) {
+  return ('Здравствуйте! Пришлите, пожалуйста, подробный маршрут по дням. ' + wa).trim();
+}
+
 export function pickTours(a) {
   const suitable = CATALOG.filter(tour => tour.season.includes(a.season) &&
     (a.days === '3' ? matchTour(tour, '3') : tour.days.includes(Number(a.days))));
@@ -127,7 +143,10 @@ function initChat() {
   const close = el('button', 'cx__close', '✕');
   close.type = 'button';
   close.setAttribute('aria-label', 'Закрыть чат');
-  head.append(el('b', 'cx__title', 'ИИ-помощник Kazakhstan Travel'), close);
+  const titles = el('div', 'cx__titles');
+  titles.append(el('b', 'cx__title', 'ИИ-помощник Kazakhstan Travel'),
+    el('span', 'cx__sub', 'Вы общаетесь с ИИ-помощником, детали подтвердит гид'));
+  head.append(titles, close);
   const log = el('div', 'cx__log');
   log.setAttribute('aria-live', 'polite');
   const chips = el('div', 'cx__chips');
@@ -144,7 +163,7 @@ function initChat() {
   send.setAttribute('aria-label', 'Отправить');
   const row = el('div', 'cx__row');
   row.append(input, mic, send);
-  const note = el('p', 'cx__note', 'Это ИИ-помощник, не живой человек. Цены уточняйте в WhatsApp');
+  const note = el('p', 'cx__note', 'Цены и даты уточняйте в WhatsApp');
   form.append(row, note);
   panel.append(head, log, chips, form);
   root.append(fab, panel);
@@ -234,6 +253,7 @@ function initChat() {
     history.length = 0;
     if (aiUrl) {
       say('Здравствуйте! Я ИИ-помощник Kazakhstan Travel. Расскажу о маршрутах, сезонах и что входит в тур, помогу подобрать поездку и оставить заявку. Спросите меня о чём угодно.', () => {
+        chip('✦ Подбор за 4 вопроса', runQuiz);
         ['Куда поехать на 1 день?', 'Что посмотреть зимой?', 'Что входит в стоимость?'].forEach(q => {
           const chip = el('button', 'cx__chip', q);
           chip.type = 'button';
@@ -244,6 +264,37 @@ function initChat() {
       return;
     }
     say('Здравствуйте! Я помощник по подбору тура. Отвечайте кнопками или своими словами.', () => askNext(''));
+  }
+
+  function waChip(label, text, extra) {
+    const link = el('a', extra ? 'cx__chip cx__chip--wa ' + extra : 'cx__chip cx__chip--wa', label);
+    link.href = buildWaUrl(text);
+    link.target = '_blank';
+    link.rel = 'noopener';
+    chips.append(link);
+  }
+
+  function runQuiz() {
+    const picked = {};
+    const ask = i => {
+      chips.replaceChildren();
+      if (i >= QUIZ.length) {
+        const text = buildQuizRequest(picked);
+        userMessage(text);
+        viaAgent(text);
+        return;
+      }
+      say(QUIZ[i].question, () => {
+        for (const option of QUIZ[i].options) {
+          chip(option, () => {
+            userMessage(option);
+            picked[QUIZ[i].key] = option;
+            ask(i + 1);
+          });
+        }
+      });
+    };
+    ask(0);
   }
 
   const aiUrl = agentUrl();
@@ -264,12 +315,10 @@ function initChat() {
           img.onload = () => { log.scrollTop = log.scrollHeight; };
           (log.lastElementChild.querySelector('.cx__text') || log.lastElementChild).append(img);
         });
-        if (!reply.wa) return;
-        const link = el('a', 'cx__chip cx__chip--wa', 'Написать в WhatsApp');
-        link.href = buildWaUrl(reply.wa);
-        link.target = '_blank';
-        link.rel = 'noopener';
-        chips.replaceChildren(link);
+        chips.replaceChildren();
+        if (reply.wa) waChip('Написать в WhatsApp', reply.wa);
+        waChip('Запросить маршрут по дням', buildItineraryText(reply.wa || ''), 'cx__chip--plan');
+        chip('Подбор за 4 вопроса', runQuiz);
       });
     }).catch(() => {
       history.pop();
