@@ -1,0 +1,288 @@
+/* ИИ-помощник: спокойный минималистичный чат. Цвета — только из tokens.css. */
+.cx-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 24px;
+  z-index: 20;
+  cursor: pointer;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 22px;
+  min-height: 52px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--on-accent);
+  background: var(--accent);
+  box-shadow: var(--shadow);
+  transition: background-color var(--t);
+}
+
+.cx-fab:hover {
+  background: var(--accent-2);
+}
+
+.cx {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: 440px;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  color: var(--text);
+  background: var(--card);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  font-family: var(--f-text);
+  font-size: 16px;
+}
+
+.cx[hidden] {
+  display: none;
+}
+
+.cx button,
+.cx textarea {
+  font: inherit;
+}
+
+.cx__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px 14px 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.cx__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cx__close,
+.cx__tool {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  transition: background-color var(--t), color var(--t);
+}
+
+.cx__close:hover,
+.cx__tool:hover:not(:disabled) {
+  color: var(--ink);
+  background: var(--sand);
+}
+
+.cx__tool {
+  font-size: 17px;
+  filter: grayscale(1);
+}
+
+.cx__tool:disabled {
+  cursor: not-allowed;
+  opacity: .4;
+}
+
+.cx__log {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 20px 12px;
+}
+
+.cx__msg {
+  margin: 0;
+  line-height: 1.6;
+  animation: cx-in .2s ease;
+}
+
+.cx__msg--bot {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.cx__text {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.cx__dot {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  margin-top: 1px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.cx__msg--user {
+  align-self: flex-end;
+  max-width: 82%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  color: var(--text);
+  background: var(--sand);
+}
+
+.cx__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 20px 12px;
+}
+
+.cx__chips:empty {
+  display: none;
+}
+
+.cx__chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: var(--card);
+  transition: background-color var(--t), border-color var(--t);
+}
+
+.cx__chip:hover {
+  border-color: var(--accent-3);
+  background: var(--paper);
+}
+
+.cx__chip--wa {
+  border-color: var(--wa);
+  color: var(--on-accent);
+  background: var(--wa);
+}
+
+.cx__chip--wa:hover {
+  border-color: var(--wa-2);
+  background: var(--wa-2);
+}
+
+.cx__form {
+  padding: 8px 16px 14px;
+}
+
+.cx__row {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 6px 6px 6px 16px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: var(--shadow-s);
+  transition: border-color var(--t);
+}
+
+.cx__row:focus-within {
+  border-color: var(--accent-3);
+}
+
+.cx__input {
+  flex: 1;
+  align-self: center;
+  min-height: 24px;
+  padding: 6px 0;
+  resize: none;
+  overflow-y: auto;
+  scrollbar-width: none;
+  border: 0;
+  outline: 0;
+  line-height: 1.5;
+  color: var(--text);
+  background: transparent;
+}
+
+.cx__input::-webkit-scrollbar {
+  display: none;
+}
+
+.cx__input::placeholder {
+  color: var(--muted);
+}
+
+.cx__send {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  cursor: pointer;
+  border: 0;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+  transition: background-color var(--t);
+}
+
+.cx__send:hover {
+  background: var(--accent-2);
+}
+
+.cx__note {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cx-fab:focus-visible,
+.cx button:focus-visible,
+.cx a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.cx textarea:focus-visible {
+  outline: 0;
+}
+
+@keyframes cx-in {
+  from { opacity: 0; transform: translateY(4px); }
+}
+
+@media (max-width: 900px) {
+  .cx {
+    width: 100vw;
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cx,
+  .cx__msg {
+    animation: none;
+  }
+}
